@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -6,10 +7,35 @@ from .database import engine
 from .routers import post, user, auth, vote
 from .config import settings
 
-
+############### Old Code: non graceful shutdown  ###############
+# create the database tables if they don't exist (case of not using alembic)
 # models.Base.metadata.create_all(bind=engine)
 
-app = FastAPI()
+# app = FastAPI()
+
+################ End Old Code #############
+
+
+################### New Code: Lifespan Handler  ---> for graceful shutdown ###############################
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    print("🔌 Connecting to PostgreSQL...")
+    try:
+        # Create the database tables if they don't exist (case of not using alembic)
+        # models.Base.metadata.create_all(bind=engine)
+        print("✅ Connected.")
+        yield
+    finally:
+        print("🧹 Closing PostgreSQL connection...")
+        await engine.dispose()
+        print("✅ Disconnected.")
+
+
+# Create the FastAPI app with lifespan handler
+app = FastAPI(lifespan=lifespan)
+
+################ End of New Code #############
+
 
 origins = ["*"]
 
