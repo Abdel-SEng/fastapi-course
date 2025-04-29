@@ -1,13 +1,18 @@
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
-from . import database, models
-from .schemas import token_schema
+from passlib.context import CryptContext
+
+from ..db import database
+from ..models import models
+from ..schemas import token_schema
 from fastapi import Depends, status, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from .config import settings
 
+
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # SECRET_KEY
 # Algorithm
@@ -58,3 +63,11 @@ def get_current_user(
     user = db.query(models.User).filter(models.User.id == token.id).first()
 
     return user
+
+
+def hash(password: str):
+    return pwd_context.hash(password)
+
+
+def verify(plain_password, hashed_password):
+    return pwd_context.verify(plain_password, hashed_password)

@@ -2,7 +2,7 @@ import pytest
 from jose import jwt
 from app.schemas import user_schema, token_schema
 
-from app.config import settings
+from app.core.config import settings
 
 
 # def test_root(client):

@@ -2,10 +2,10 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from . import models
-from .database import engine
+from .models import models
+from .db.database import engine
 from .routers import post, user, auth, vote
-from .config import settings
+from .core.config import settings
 
 ############### Old Code: non graceful shutdown  ###############
 # create the database tables if they don't exist (case of not using alembic)

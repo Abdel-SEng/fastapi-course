@@ -4,10 +4,12 @@ from typing import List, Optional
 
 from sqlalchemy import func
 
+from ..core import security
+
 # from sqlalchemy.sql.functions import func
-from .. import models, oauth2
+from ..models import models
 from ..schemas import post_schema
-from ..database import get_db
+from ..db.database import get_db
 
 
 router = APIRouter(prefix="/posts", tags=["Posts"])
@@ -17,7 +19,7 @@ router = APIRouter(prefix="/posts", tags=["Posts"])
 @router.get("/", response_model=List[post_schema.PostOut])
 def get_posts(
     db: Session = Depends(get_db),
-    current_user: int = Depends(oauth2.get_current_user),
+    current_user: int = Depends(security.get_current_user),
     limit: int = 10,
     skip: int = 0,
     search: Optional[str] = "",
@@ -53,7 +55,7 @@ def get_posts(
 def create_posts(
     post: post_schema.PostCreate,
     db: Session = Depends(get_db),
-    current_user: int = Depends(oauth2.get_current_user),
+    current_user: int = Depends(security.get_current_user),
 ):
     # cursor.execute("""INSERT INTO posts (title, content, published) VALUES (%s, %s, %s) RETURNING * """,
     #                (post.title, post.content, post.published))
@@ -73,7 +75,7 @@ def create_posts(
 def get_post(
     id: int,
     db: Session = Depends(get_db),
-    current_user: int = Depends(oauth2.get_current_user),
+    current_user: int = Depends(security.get_current_user),
 ):
     # cursor.execute("""SELECT * from posts WHERE id = %s """, (str(id),))
     # post = cursor.fetchone()
@@ -100,7 +102,7 @@ def get_post(
 def delete_post(
     id: int,
     db: Session = Depends(get_db),
-    current_user: int = Depends(oauth2.get_current_user),
+    current_user: int = Depends(security.get_current_user),
 ):
 
     # cursor.execute(
@@ -134,7 +136,7 @@ def update_post(
     id: int,
     updated_post: post_schema.PostCreate,
     db: Session = Depends(get_db),
-    current_user: int = Depends(oauth2.get_current_user),
+    current_user: int = Depends(security.get_current_user),
 ):
 
     # cursor.execute("""UPDATE posts SET title = %s, content = %s, published = %s WHERE id = %s RETURNING *""",
