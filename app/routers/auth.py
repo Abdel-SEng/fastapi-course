@@ -1,9 +1,9 @@
-from fastapi import APIRouter, Depends, status, HTTPException, Response
+from fastapi import APIRouter, Depends, status, HTTPException
 from fastapi.security.oauth2 import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
+from ..db_crud import crud_user
 from ..db import database
-from ..models import models
 from ..schemas import token_schema
 from ..core import security
 
@@ -16,24 +16,17 @@ def login(
     db: Session = Depends(database.get_db),
 ):
 
-    user = (
-        db.query(models.User)
-        .filter(models.User.email == user_credentials.username)
-        .first()
-    )
+    user = crud_user.get_user_by_email(db, user_credentials.username)
 
     if not user:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail=f"Invalid Credentials"
         )
 
-    if not security.verify(user_credentials.password, user.password):
+    if not security.verify_password(user_credentials.password, user.password):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail=f"Invalid Credentials"
         )
-
-    # create a token
-    # return token
 
     access_token = security.create_access_token(data={"user_id": user.id})
 
